@@ -1,5 +1,5 @@
 {
-  "name": "claude-notify",
+  "name": "claude-code-notify",
   "displayName": "Claude Notify",
   "description": "Get notified when Claude Code finishes a task and is waiting for input",
   "version": "0.1.0",
