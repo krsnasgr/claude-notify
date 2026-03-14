@@ -1,0 +1,72 @@
+{
+  "name": "claude-notify",
+  "displayName": "Claude Notify",
+  "description": "Get notified when Claude Code finishes a task and is waiting for input",
+  "version": "0.1.0",
+  "publisher": "krsnasgr",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["AI", "Other"],
+  "keywords": ["claude", "claude-code", "notifications", "anthropic", "ai", "assistant", "productivity"],
+  "icon": "icons/claude.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krsnasgr/claude-notify.git"
+  },
+  "homepage": "https://github.com/krsnasgr/claude-notify#readme",
+  "bugs": {
+    "url": "https://github.com/krsnasgr/claude-notify/issues"
+  },
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "claude-notifications.toggle",
+        "title": "Claude Notify: Toggle"
+      },
+      {
+        "command": "claude-notifications.test",
+        "title": "Claude Notify: Send Test Notification"
+      }
+    ],
+    "configuration": {
+      "title": "Claude Notify",
+      "properties": {
+        "claudeNotifications.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable or disable Claude Code completion notifications"
+        },
+        "claudeNotifications.onlyWhenUnfocused": {
+          "type": "boolean",
+          "default": false,
+          "description": "Only send OS notifications when VS Code is not focused"
+        },
+        "claudeNotifications.cooldownSeconds": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "description": "Minimum seconds between notifications to avoid duplicates"
+        },
+        "claudeNotifications.sound": {
+          "type": "boolean",
+          "default": true,
+          "description": "Play a sound with the notification (macOS only)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}
