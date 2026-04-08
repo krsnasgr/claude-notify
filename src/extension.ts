@@ -14,7 +14,13 @@ const MESSAGES: Record<SignalType, string> = {
 
 export function activate(context: vscode.ExtensionContext) {
   // Install the hooks into Claude Code settings
-  installHook();
+  try {
+    installHook();
+  } catch (err: any) {
+    vscode.window.showWarningMessage(
+      `Claude Notify: Could not read ~/.claude/settings.json — ${err.message}. Fix the file manually or remove it to start fresh.`
+    );
+  }
 
   // Create status bar item
   statusBarItem = vscode.window.createStatusBarItem(
@@ -87,7 +93,12 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
   signalWatchers.forEach((w) => w.stop());
   signalWatchers.length = 0;
-  removeHook();
+  try {
+    removeHook();
+  } catch {
+    // If settings can't be read, hooks can't be cleaned up.
+    // User will need to remove entries containing "# claude-notify-extension" manually.
+  }
 }
 
 function updateStatusBar() {
