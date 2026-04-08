@@ -35,6 +35,8 @@ export function installHook(): void {
     settings.hooks = {};
   }
 
+  let dirty = false;
+
   const hookConfigs: { event: string; signalType: SignalType }[] = [
     { event: "Stop", signalType: "stop" },
     { event: "Notification", signalType: "notification" },
@@ -46,24 +48,44 @@ export function installHook(): void {
       settings.hooks[event] = [];
     }
 
-    const alreadyInstalled = settings.hooks[event].some((entry: any) =>
+    const expectedCommand = `touch ${SIGNAL_FILES[signalType]} ${HOOK_MARKER}`;
+
+    const existingIndex = settings.hooks[event].findIndex((entry: any) =>
       entry.hooks?.some((h: any) => h.command?.includes(HOOK_MARKER))
     );
 
-    if (!alreadyInstalled) {
+    if (existingIndex === -1) {
       settings.hooks[event].push({
         hooks: [
           {
             type: "command",
-            command: `touch ${SIGNAL_FILES[signalType]} ${HOOK_MARKER}`,
+            command: expectedCommand,
             async: true,
           },
         ],
       });
+      dirty = true;
+    } else {
+      const existingCommand = settings.hooks[event][existingIndex]
+        .hooks?.find((h: any) => h.command?.includes(HOOK_MARKER))?.command;
+      if (existingCommand !== expectedCommand) {
+        settings.hooks[event][existingIndex] = {
+          hooks: [
+            {
+              type: "command",
+              command: expectedCommand,
+              async: true,
+            },
+          ],
+        };
+        dirty = true;
+      }
     }
   }
 
-  writeSettings(settings);
+  if (dirty) {
+    writeSettings(settings);
+  }
 }
 
 export function removeHook(): void {
@@ -96,12 +118,14 @@ export function removeHook(): void {
 }
 
 function readSettings(): any {
+  let content: string;
   try {
-    const content = fs.readFileSync(CLAUDE_SETTINGS_PATH, "utf-8");
-    return JSON.parse(content);
+    content = fs.readFileSync(CLAUDE_SETTINGS_PATH, "utf-8");
   } catch {
-    return {};
+    return {}; // File doesn't exist yet
   }
+  // File exists — don't silently swallow parse errors
+  return JSON.parse(content);
 }
 
 function writeSettings(settings: any): void {
